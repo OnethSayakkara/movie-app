@@ -4,7 +4,7 @@ import React from 'react'
 const SearchBar = () => {
   return (
     <View>
-      <Text>SearchBar</Text>
+      <Text>Uvindu nigga</Text>
     </View>
   )
 }
