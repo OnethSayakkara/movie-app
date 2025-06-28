@@ -104,3 +104,68 @@ export const fetchMovieVideos = async (movieId: string) => {
     throw error;
   }
 };
+
+
+
+// api.ts or services/api.ts
+
+export const fetchTVSeries = async ({ query }: { query: string }) => {
+  const endpoint = query
+    ? `${TMDB_CONFIG.BASE_URL}/search/tv?query=${encodeURIComponent(query)}`
+    : `${TMDB_CONFIG.BASE_URL}/discover/tv?sort_by=popularity.desc`;
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: TMDB_CONFIG.headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch TV series: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.results;
+};
+
+export const fetchTVSeriesDetails = async (tvId: string) => {
+  const response = await fetch(
+    `${TMDB_CONFIG.BASE_URL}/tv/${tvId}?api_key=${TMDB_CONFIG.API_KEY}`,
+    {
+      method: "GET",
+      headers: TMDB_CONFIG.headers,
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch TV series details: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data;
+};
+
+
+
+export const fetchTVSeriesVideos = async (tvId: string) => {
+  try {
+    const response = await fetch(
+      `${TMDB_CONFIG.BASE_URL}/tv/${tvId}/videos?api_key=${TMDB_CONFIG.API_KEY}`,
+      {
+        method: "GET",
+        headers: TMDB_CONFIG.headers,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch TV series videos: ${response.status} - ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+    return data; // will have a "results" array with video info
+  } catch (error) {
+    console.error(`Error fetching TV series videos for id ${tvId}:`, error);
+    throw error;
+  }
+};

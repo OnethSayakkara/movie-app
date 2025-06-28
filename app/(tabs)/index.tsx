@@ -9,7 +9,7 @@ import {
 import { useRouter } from "expo-router";
 
 import useFetch from "@/services/usefetch";
-import { fetchMovies } from "@/services/api";
+import { fetchMovies, fetchTVSeries } from "@/services/api";
 import { getTrendingMovies } from "@/services/appwrite";
 
 import { icons } from "@/constants/icons";
@@ -18,21 +18,35 @@ import { images } from "@/constants/images";
 import SearchBar from "@/components/SearchBar";
 import MovieCard from "@/components/MovieCard";
 import TrendingCard from "@/components/TrendingCard";
+import TVSeriesCard from "@/components/TVSeriesCard";
 
 const Index = () => {
   const router = useRouter();
 
+  // Fetch trending movies
   const {
     data: trendingMovies,
     loading: trendingLoading,
     error: trendingError,
   } = useFetch(getTrendingMovies);
 
+  // Fetch latest movies
   const {
     data: movies,
     loading: moviesLoading,
     error: moviesError,
   } = useFetch(() => fetchMovies({ query: "" }));
+
+  // Fetch latest TV series
+  const {
+    data: tvSeries,
+    loading: tvSeriesLoading,
+    error: tvSeriesError,
+  } = useFetch(() => fetchTVSeries({ query: "" }));
+
+  // Combine loading & error states for convenience
+  const isLoading = trendingLoading || moviesLoading || tvSeriesLoading;
+  const errorMessage = moviesError?.message || trendingError?.message || tvSeriesError?.message;
 
   return (
     <View className="flex-1 bg-primary">
@@ -47,23 +61,25 @@ const Index = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ minHeight: "100%", paddingBottom: 10 }}
       >
-        <Image source={icons.logo} className="w-12 h-10 mt-20 mb-5 mx-auto" />
+        <Image source={icons.logo} className="w-20 h-16 mt-20 mb-5 mx-auto" />
 
-        {moviesLoading || trendingLoading ? (
+        {isLoading ? (
           <ActivityIndicator
             size="large"
             color="#0000ff"
             className="mt-10 self-center"
           />
-        ) : moviesError || trendingError ? (
-          <Text>Error: {moviesError?.message || trendingError?.message}</Text>
+        ) : errorMessage ? (
+          <Text className="text-center text-white mt-10">
+            Error: {errorMessage}
+          </Text>
         ) : (
           <View className="flex-1 mt-5">
             <SearchBar
               onPress={() => {
                 router.push("/search");
               }}
-              placeholder="Search for a movie"
+              placeholder="Search for a movie or TV series"
             />
 
             {trendingMovies && (
@@ -88,26 +104,43 @@ const Index = () => {
               </View>
             )}
 
-            <>
-              <Text className="text-lg text-white font-bold mt-5 mb-3">
-                Latest Movies
-              </Text>
+            {/* Latest Movies */}
+            <Text className="text-lg text-white font-bold mt-5 mb-3">
+              Latest Movies
+            </Text>
+            <FlatList
+              data={movies}
+              renderItem={({ item }) => <MovieCard {...item} />}
+              keyExtractor={(item) => item.id.toString()}
+              numColumns={3}
+              columnWrapperStyle={{
+                justifyContent: "flex-start",
+                gap: 20,
+                paddingRight: 5,
+                marginBottom: 10,
+              }}
+              className="mt-2 pb-10"
+              scrollEnabled={false}
+            />
 
-              <FlatList
-                data={movies}
-                renderItem={({ item }) => <MovieCard {...item} />}
-                keyExtractor={(item) => item.id.toString()}
-                numColumns={3}
-                columnWrapperStyle={{
-                  justifyContent: "flex-start",
-                  gap: 20,
-                  paddingRight: 5,
-                  marginBottom: 10,
-                }}
-                className="mt-2 pb-32"
-                scrollEnabled={false}
-              />
-            </>
+            {/* Latest TV Series */}
+            <Text className="text-lg text-white font-bold mt-5 mb-3">
+              Latest TV Series
+            </Text>
+            <FlatList
+              data={tvSeries}
+              renderItem={({ item }) => <TVSeriesCard {...item} />}
+              keyExtractor={(item) => item.id.toString()}
+              numColumns={3}
+              columnWrapperStyle={{
+                justifyContent: "flex-start",
+                gap: 20,
+                paddingRight: 5,
+                marginBottom: 10,
+              }}
+              className="mt-2 pb-32"
+              scrollEnabled={false}
+            />
           </View>
         )}
       </ScrollView>
@@ -116,6 +149,7 @@ const Index = () => {
 };
 
 export default Index;
+
 
 /* eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4YTg3OTk2MTY2ZjdmNjIwOWZjYmZkZDU4NWY1YTQ1MyIsIm5iZiI6MTc1MTAzODkzMC43NTAwMDAyLCJzdWIiOiI2ODVlYmJkMmE4M2NjZDgxZjQ5MTUyYzkiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.vKhG4lijqrJevueEefGbeViXfjGyFvWk2RODjYAUbPc
 
