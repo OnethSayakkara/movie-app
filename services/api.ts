@@ -12,6 +12,8 @@ fetch(url, options)
   .then(json => console.log(json))
   .catch(err => console.error(err)); */
 
+  import { Movie, TVSeries, FilterParams } from "@/types/types";
+
   export const TMDB_CONFIG = {
   BASE_URL: "https://api.themoviedb.org/3",
   API_KEY: process.env.EXPO_PUBLIC_MOVIE_API_KEY,
@@ -274,4 +276,37 @@ export const fetchMoviesByFilter = async ({
 
   const data = await response.json();
   return data.results;
+};
+
+
+
+export const fetchTVSeriesByFilter = async (filter: FilterParams): Promise<TVSeries[]> => {
+  const params = new URLSearchParams();
+
+  // Handle specific cases based on filter properties
+  if (filter.genreId) params.append("with_genres", filter.genreId.toString());
+  if (filter.language) params.append("with_original_language", filter.language);
+  if (filter.originCountry) params.append("with_origin_country", filter.originCountry);
+  params.append("sort_by", "popularity.desc");
+
+  const endpoint = `${TMDB_CONFIG.BASE_URL}/discover/tv?${params.toString()}`;
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: TMDB_CONFIG.headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch TV series by filter: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.results.map((item: any) => ({
+    id: item.id,
+    poster_path: item.poster_path,
+    name: item.name,
+    vote_average: item.vote_average,
+    first_air_date: item.first_air_date,
+    genre_ids: item.genre_ids,
+  }));
 };

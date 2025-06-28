@@ -22,4 +22,5 @@ export interface FilterParams {
   region?: string;
   language?: string;
   year?: number;
+  originCountry?: string;
 }
