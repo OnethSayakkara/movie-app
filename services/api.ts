@@ -70,3 +70,37 @@ export const fetchMovieDetails = async (
     throw error;
   }
 };
+
+
+// api.ts
+export const fetchMovieVideos = async (movieId: string) => {
+  try {
+    const response = await fetch(
+      `${TMDB_CONFIG.BASE_URL}/movie/${movieId}/videos?api_key=${TMDB_CONFIG.API_KEY}`,
+      {
+        method: "GET",
+        headers: TMDB_CONFIG.headers,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch movie videos: ${response.status} - ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log(`Video API Response for movieId ${movieId}:`, data.results);
+    const video = (
+      data.results.find((video: any) => video.type === "Trailer" && video.site === "YouTube") ||
+      data.results.find((video: any) => video.type === "Teaser" && video.site === "YouTube") ||
+      data.results.find((video: any) => video.type === "Clip" && video.site === "YouTube") ||
+      data.results.find((video: any) => video.site === "YouTube")
+    );
+    if (!video) {
+      console.log(`No suitable video found for movieId ${movieId}`);
+    }
+    return video;
+  } catch (error) {
+    console.error(`Error fetching movie videos for movieId ${movieId}:`, error);
+    throw error;
+  }
+};
