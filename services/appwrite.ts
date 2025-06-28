@@ -31,6 +31,7 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
         movie_id: movie.id,
         title: movie.title,
         count: 1,
+        date: movie.release_date || "N/A",
         poster_url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
       });
     }

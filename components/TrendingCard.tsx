@@ -4,8 +4,18 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 
 import { images } from "@/constants/images";
 
+interface TrendingCardProps {
+  movie: {
+    movie_id: number;
+    title: string;
+    poster_url: string;
+    date?: string; // Optional to handle undefined cases
+  };
+  index: number;
+}
+
 const TrendingCard = ({
-  movie: { movie_id, title, poster_url },
+  movie: { movie_id, title, poster_url, date },
   index,
 }: TrendingCardProps) => {
   return (
@@ -33,10 +43,15 @@ const TrendingCard = ({
 
         <Text
           className="text-sm font-bold mt-2 text-light-200"
-          numberOfLines={2}
+          numberOfLines={1}
         >
           {title}
         </Text>
+        <View className="flex-row items-center justify-between mt-1">
+          <Text className="text-xs text-light-300 font-medium">
+            {date?.split("-")[0] || "N/A"}
+          </Text>
+        </View>
       </TouchableOpacity>
     </Link>
   );
