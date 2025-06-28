@@ -169,3 +169,109 @@ export const fetchTVSeriesVideos = async (tvId: string) => {
     throw error;
   }
 };
+
+
+export const fetchMovieGenres = async (): Promise<{ id: number; name: string }[]> => {
+  try {
+    const response = await fetch(
+      `${TMDB_CONFIG.BASE_URL}/genre/movie/list?api_key=${TMDB_CONFIG.API_KEY}`,
+      {
+        method: "GET",
+        headers: TMDB_CONFIG.headers,
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to fetch movie genres: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data.genres;
+  } catch (error) {
+    console.error("Error fetching movie genres:", error);
+    throw error;
+  }
+};
+
+export const fetchTVSeriesGenres = async (): Promise<{ id: number; name: string }[]> => {
+  try {
+    const response = await fetch(
+      `${TMDB_CONFIG.BASE_URL}/genre/tv/list?api_key=${TMDB_CONFIG.API_KEY}`,
+      {
+        method: "GET",
+        headers: TMDB_CONFIG.headers,
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to fetch TV series genres: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data.genres;
+  } catch (error) {
+    console.error("Error fetching TV series genres:", error);
+    throw error;
+  }
+};
+
+
+export const fetchMoviesByCategory = async (filter: {
+  language?: string;
+  region?: string;
+  genreId?: number;
+}): Promise<Movie[]> => {
+  let url = `${TMDB_CONFIG.BASE_URL}/discover/movie?sort_by=popularity.desc`;
+
+  if (filter.language) {
+    url += `&with_original_language=${filter.language}`;
+  }
+
+  if (filter.region) {
+    url += `&region=${filter.region}`;
+  }
+
+  if (filter.genreId) {
+    url += `&with_genres=${filter.genreId}`;
+  }
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: TMDB_CONFIG.headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch movies: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.results;
+};
+
+
+export const fetchMoviesByFilter = async ({
+  language,
+  region,
+  genreId,
+}: {
+  language?: string;
+  region?: string;
+  genreId?: number;
+}): Promise<Movie[]> => {
+  const params = new URLSearchParams();
+
+  if (language) params.append("with_original_language", language);
+  if (region) params.append("region", region);
+  if (genreId) params.append("with_genres", genreId.toString());
+  params.append("sort_by", "popularity.desc");
+
+  const endpoint = `${TMDB_CONFIG.BASE_URL}/discover/movie?${params.toString()}`;
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: TMDB_CONFIG.headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch movies by filter: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.results;
+};
